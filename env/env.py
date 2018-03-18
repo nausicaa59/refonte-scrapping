@@ -1,0 +1,15 @@
+# worker
+WORKER_CANALREAD = "scrape-order"
+WORKER_CANALSEND_OUTPUT = "scrape-output"
+WORKER_CANALSEND_ISOK = "scrape-ok"
+WORKER_SERVERMQ = "localhost"
+WORKER_VERBOSE = True
+WORKER_FREQ = 4
+
+# worker Home nav
+WORKER_HOMENAV_START = 100
+WORKER_HOMENAV_LEFT = True
+
+# worker Home random
+WORKER_HOMERANDOM_MIN = 0
+WORKER_HOMERANDOM_MAX = 100
