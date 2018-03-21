@@ -3,6 +3,7 @@
 #----------------------
 import os
 import sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/models")
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/parseurs")
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/workers")
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/tools")
@@ -20,6 +21,5 @@ for arg in sys.argv:
 		typeObj = arg.replace("-type=","")
 
 w = FactoryWorker.make(typeObj)
-w.getOption()
 w.run()
 

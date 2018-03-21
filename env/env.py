@@ -1,7 +1,8 @@
 # worker
-WORKER_CANALREAD = "scrape-order"
-WORKER_CANALSEND_OUTPUT = "scrape-output"
-WORKER_CANALSEND_ISOK = "scrape-ok"
+DB_USER = 'localhost'
+DB_PASS = ''
+DB_PORT = 27017
+DB_BASE = 'forum'
 WORKER_SERVERMQ = "localhost"
 WORKER_VERBOSE = True
 WORKER_FREQ = 4

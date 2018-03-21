@@ -5,19 +5,7 @@ from worker import Worker
 from parseurs.factoryParseur import FactoryParseur
 from env import env
 
-"""
-Message output
-============
-profil
-	dateCreated
-	type
-	data
-		dateInscription
-		nbMessages
-		imgLien
-		nbRelation
-		banni
-"""
+
 
 class WorkerProfil(Worker):
 	def __init__(self):
@@ -28,7 +16,7 @@ class WorkerProfil(Worker):
 		while True:	
 			pseudo = "meego"
 			self.getProfil(pseudo)
-			time.sleep(self.freq)
+			time.sleep(env.WORKER_FREQ)
 
 
 	def getProfil(self, pseudo):
@@ -37,19 +25,14 @@ class WorkerProfil(Worker):
 			html = self.runGetQuery(url)
 			profil = self.parse(html)
 			profil['pseudo'] = pseudo
-			self.sendMsg("profil", profil)
-			self.sendMsgIsOk("profil")
 			self.notify(pseudo, url, profil)
 		except Exception as e:
 			raise e
 
 
-	def getOption(self):
-		Worker.getOption(self)
-
 
 	def notify(self, pseudo, url, profil):
-		if self.verbose :
+		if env.WORKER_VERBOSE :
 			print("-----------")
 			print("Type : profil")
 			print("Pseudo : " + pseudo)

@@ -1,62 +1,33 @@
 import sys
 import time
 from tools import generateurUrl
-from worker import Worker
+from workers.workerHomeRandom import WorkerHomeRandom
 from parseurs.factoryParseur import FactoryParseur
 from env import env
 
-"""
-Message Output
-===============
-sujets
-	dateCreated
-	type
-	data
-		[{
-			url
-			date
-			nbReponse
-			auteur
-		}]
-"""
-
-class WorkerHomeNav(Worker):
-	def __init__(self):
-		super(WorkerHomeNav, self).__init__(FactoryParseur.make('sujet'))
-		self.start 	= env.WORKER_HOMENAV_START
-		self.left 	= env.WORKER_HOMENAV_LEFT
 
 
+class WorkerHomeNav(WorkerHomeRandom):
 	def run(self):
-		num = self.start
+		num = env.WORKER_HOMENAV_START
 		url = generateurUrl.homePageById(num)
 
 		try:
 			while True:
 				html = self.runGetQuery(url)
 				(sujets, nbConnect) = self.parse(html)
+				self.persiste(sujets, nbConnect)
 				self.notify(url, num, sujets)
-				self.sendMsg("sujets", sujets)
-				(num, url) = generateurUrl.homePageNext(num , self.left)
+				(num, url) = generateurUrl.homePageNext(num , env.WORKER_HOMENAV_LEFT)
 				if num <= 0:
 					break
-				time.sleep(self.freq)
+				time.sleep(env.WORKER_FREQ)
 		except Exception as e:
 			print(str(e))
 
 
-	def getOption(self):
-		Worker.getOption(self)
-		for arg in sys.argv:
-			if arg.find("-start=") is not -1:
-				self.start = int(arg.replace("-start=",""))
-			if arg.find("-left=") is not -1:
-				sens = arg.replace("-left=","")
-				self.left = False if sens.lower() == "false" else True
-
-
 	def notify(self, link, numPage, sujets):
-		if self.verbose :
+		if env.WORKER_VERBOSE :
 			print("-----------")
 			print("Type : home-nav")
 			print("Id Page : " + str(numPage))

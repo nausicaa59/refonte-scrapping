@@ -34,21 +34,16 @@ class WorkerAbonne(Worker):
 				html = self.runGetQuery(nextUrl)			
 				(pagination, abonne) = self.parse(html)	
 				data = {"pseudo" : pseudo, "abonnes" : abonne}			
-				self.sendMsg("abonnes", data)
-				self.sendMsgIsOk("abonnes")
 				self.notify(pseudo, nextUrl, data)
 				nextUrl = pagination[0] if len(pagination) > 0 else None
-				time.sleep(self.freq)
+				time.sleep(env.WORKER_FREQ)
 		except Exception as e:
 			raise e
 
 
-	def getOption(self):
-		Worker.getOption(self)
-
 
 	def notify(self, pseudo, url, data):
-		if self.verbose :
+		if env.WORKER_VERBOSE :
 			print("-----------")
 			print("Type : abonne")
 			print("Pseudo : " + pseudo)
