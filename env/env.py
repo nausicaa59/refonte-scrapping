@@ -5,7 +5,7 @@ DB_PORT = 27017
 DB_BASE = 'forum'
 WORKER_SERVERMQ = "localhost"
 WORKER_VERBOSE = True
-WORKER_FREQ = 4
+WORKER_FREQ = 1
 
 # worker Home nav
 WORKER_HOMENAV_START = 100

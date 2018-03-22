@@ -1,5 +1,6 @@
 from cerberus import Validator
-import helpers
+from verifications import helpers
+from verifications.errors import *
 
 
 class VerificationProfil:
@@ -18,24 +19,15 @@ class VerificationProfil:
 	def controle(self):
 		v = Validator(self.schema, allow_unknown = True)
 		if v.validate(self.data) == False :
-			return (False, v.errors)
+			raise ExceptionControle(str(v.errors))
 
 		(valide, err) = helpers.dateIsValide(self.data["dateInscription"])
 		if valide == False:
-			return (False, {"dateInscription" : err})
-
-
-		return (True, None)
-
+			raise ExceptionControle("date d'inscription invalide")
 
 
 	def prepare(self):
-		try:
-			self.data["pseudo"] = self.data["pseudo"].lower()
-			self.data['scrapped-profil'] = True
-			self.data['scrapped-abonne'] = False
-			self.data["dateInscription"] = helpers.parseDate(self.data["dateInscription"])
-		except Exception as e:
-			return(False, str(e))
-		
-		return (True, None)
+		self.data["pseudo"] = self.data["pseudo"].lower()
+		self.data['scrapped-profil'] = True
+		self.data['scrapped-abonne'] = False
+		self.data["dateInscription"] = helpers.parseDate(self.data["dateInscription"])

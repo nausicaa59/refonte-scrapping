@@ -1,6 +1,6 @@
 from cerberus import Validator
 from verifications import helpers
-
+from verifications.errors import *
 
 class VerificationConnect:
 	def __init__(self, data):
@@ -12,24 +12,14 @@ class VerificationConnect:
 
 
 	def controle(self):
-		try:
-			v = Validator(self.schema, allow_unknown = True)
-			if v.validate(self.data) == False :
-				return (False, v.errors)
+		v = Validator(self.schema, allow_unknown = True)
+		if v.validate(self.data) == False :
+			raise ExceptionControle("Invalide data : " + str(v.errors))
 
-			(valide, err) = helpers.dateIsValide(self.data["date"])
-			if valide == False:
-				return (False, {"date" : err})
-		except Exception as e:
-			return(False, str(e))
-		
-		return (True, None)
+		(valide, err) = helpers.dateIsValide(self.data["date"])
+		if valide == False:
+			raise ExceptionControle("Invalide date : " + err)
 
 
 	def prepare(self):
-		try:
-			self.data["date"] = helpers.parseDate(self.data["date"])
-		except Exception as e:
-			return(False, str(e))
-		
-		return (True, None)
+		self.data["date"] = helpers.parseDate(self.data["date"])

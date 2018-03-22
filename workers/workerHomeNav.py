@@ -1,6 +1,7 @@
 import sys
 import time
 from tools import generateurUrl
+from pymongo.errors import ServerSelectionTimeoutError
 from workers.workerHomeRandom import WorkerHomeRandom
 from parseurs.factoryParseur import FactoryParseur
 from env import env
@@ -14,6 +15,7 @@ class WorkerHomeNav(WorkerHomeRandom):
 
 		try:
 			while True:
+				self.initDBConnection()
 				html = self.runGetQuery(url)
 				(sujets, nbConnect) = self.parse(html)
 				self.persiste(sujets, nbConnect)
@@ -21,9 +23,12 @@ class WorkerHomeNav(WorkerHomeRandom):
 				(num, url) = generateurUrl.homePageNext(num , env.WORKER_HOMENAV_LEFT)
 				if num <= 0:
 					break
-				time.sleep(env.WORKER_FREQ)
+		except ServerSelectionTimeoutError as e:
+			self.retryConnect()			
 		except Exception as e:
 			print(str(e))
+		finally:
+			time.sleep(env.WORKER_FREQ)
 
 
 	def notify(self, link, numPage, sujets):

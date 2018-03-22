@@ -33,13 +33,9 @@ class VerificationReponses:
 		v = Validator(self.schemaImages, allow_unknown = True)
 		self.data = [x for x in self.data if v.validate(x['contenu']['images'])]
 
-		return (True, None)
-
 
 	def prepare(self):
 		for i in range(len(self.data)):
 			self.data[i]['auteur'] = self.data[i]['auteur'].lower()
 			self.data[i]['date'] = helpers.parseDate(self.data[i]['date'])
 			self.data[i]['contenu']['citation'] = [x.lower() for x in self.data[i]['contenu']['citation']]
-
-		return (True, None)

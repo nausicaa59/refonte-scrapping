@@ -5,8 +5,11 @@ def save(db, data):
 		auteurs = db.auteurs
 		pseudoIsOnlyInsert = auteurs.find_one({"pseudo": data["pseudo"]})
 		if pseudoIsOnlyInsert != None:
+			data['scrapped-abonne'] = pseudoIsOnlyInsert['scrapped-abonne']
 			auteurs.delete_one({'_id': pseudoIsOnlyInsert["_id"]})
-		
+		else:
+			data['scrapped-profil'] = True
+
 		auteurs.insert_one(data)
 		return (True, None)
 	except Exception as e:
@@ -40,5 +43,6 @@ def setScrapped(db, pseudo, isScrapped):
 			auteurs.update({'_id':auteur["_id"]}, {'$set':{'scrapped' : isScrapped}})
 	except Exception as e:
 		raise e
+
 
 

@@ -43,3 +43,24 @@ def userProfil(pseudo):
 
 def userAbonne(pseudo):
 	return PATERN_PATH_AUTEUR_ABONNES.replace("[X]", pseudo)
+
+
+def startTopicPage(url, nbReponse):
+	if nbReponse == 0:
+		return url
+
+	segments = url.split("/")
+	if len(segments) <= 0:
+		return url
+
+	fragments = segments[-1].split("-")
+	if len(fragments) <= 4:
+		return url
+
+	numPage = (nbReponse // 20)
+	if numPage <= 0:
+		return url
+
+	fragments[3] = str(numPage)
+	segments[-1] = '-'.join(fragments)
+	return '/'.join(segments)

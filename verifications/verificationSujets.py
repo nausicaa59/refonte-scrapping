@@ -17,13 +17,9 @@ class VerificationSujets:
 	def controle(self):
 		v = Validator(self.schema, allow_unknown = True)
 		self.data = [x for x in self.data if v.validate(x)]
-		return (True, None)
-
 
 
 	def prepare(self):
 		for i in range(len(self.data)):
 			self.data[i]['auteur'] = self.data[i]['auteur'].lower()
 			self.data[i]['date'] = helpers.parseDate(self.data[i]['date'])
-		
-		return (True, None)

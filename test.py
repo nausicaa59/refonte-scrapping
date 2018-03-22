@@ -18,4 +18,6 @@ from models import modelConnect
 from models import modelProfil
 from models import modelReponses
 from models import modelSujets
+from tools import generateurUrl
 
+print(generateurUrl.startTopicPage("http://www.jeuxvideo.com/forums/42-51-50685036-1-0-1-0-alerte-chocapic-j-ai-eu-le-petale-d-or.htm", 284))

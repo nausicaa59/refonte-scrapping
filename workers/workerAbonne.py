@@ -3,18 +3,11 @@ import time
 from tools import generateurUrl
 from worker import Worker
 from parseurs.factoryParseur import FactoryParseur
+from pymongo.errors import ServerSelectionTimeoutError
+from verifications.verificationAbonne import VerificationAbonne
+from models import modelAbonne
 from env import env
 
-"""
-Message output
-==========
-abonne
-	dateCreated
-	type
-	data
-		pseudo
-		abonnes
-"""
 
 
 class WorkerAbonne(Worker):
@@ -28,17 +21,29 @@ class WorkerAbonne(Worker):
 
 
 	def getAbonne(self, pseudo):
-		try:
-			nextUrl = generateurUrl.userAbonne(pseudo)
-			while nextUrl != None :
+		nextUrl = generateurUrl.userAbonne(pseudo)
+		while nextUrl != None :	
+			try:
+				self.initDBConnection()
 				html = self.runGetQuery(nextUrl)			
-				(pagination, abonne) = self.parse(html)	
-				data = {"pseudo" : pseudo, "abonnes" : abonne}			
+				(pagination, abonnes) = self.parse(html)	
+				data = {"pseudo" : pseudo, "abonnes" : abonnes}
 				self.notify(pseudo, nextUrl, data)
-				nextUrl = pagination[0] if len(pagination) > 0 else None
+				self.persiste(data)			
+				nextUrl = pagination[0] if len(pagination) > 0 else None			
+			except ServerSelectionTimeoutError as e:
+				self.retryConnect()
+			except Exception as e:
+				raise e
+			finally:
 				time.sleep(env.WORKER_FREQ)
-		except Exception as e:
-			raise e
+
+
+	def persiste(self, reponses):
+		validator = VerificationAbonne(reponses)
+		validator.controle()	
+		validator.prepare()
+		modelAbonne.save(self.db, validator.data)
 
 
 

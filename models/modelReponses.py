@@ -15,3 +15,11 @@ def save(db, data):
 		return (True, None)
 	except Exception as e:
 		return (False, str(e))
+
+
+def countNbReponsesScrapped(db, refSujet):
+	try:
+		collection = db.reponses
+		return collection.find({"sujet":refSujet}).count()
+	except Exception as e:
+		raise e
