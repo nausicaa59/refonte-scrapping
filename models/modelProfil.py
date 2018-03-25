@@ -1,19 +1,13 @@
 import datetime
 
 def save(db, data):
-	try:
-		auteurs = db.auteurs
-		pseudoIsOnlyInsert = auteurs.find_one({"pseudo": data["pseudo"]})
-		if pseudoIsOnlyInsert != None:
-			data['scrapped-abonne'] = pseudoIsOnlyInsert['scrapped-abonne']
-			auteurs.delete_one({'_id': pseudoIsOnlyInsert["_id"]})
-		else:
-			data['scrapped-profil'] = True
-
-		auteurs.insert_one(data)
-		return (True, None)
-	except Exception as e:
-		return (False, str(e))
+	auteurs = db.auteurs
+	data['scrapped-profil'] = True
+	pseudoIsOnlyInsert = auteurs.find_one({"pseudo": data["pseudo"]})
+	if pseudoIsOnlyInsert != None:		
+		data['scrapped-abonne'] = pseudoIsOnlyInsert['scrapped-abonne']
+		auteurs.delete_one({'_id': pseudoIsOnlyInsert["_id"]})
+	auteurs.insert_one(data)
 
 
 def saveNotScrapped(db, pseudo):
@@ -35,14 +29,31 @@ def saveNotScrapped(db, pseudo):
 		raise e
 
 
-def setScrapped(db, pseudo, isScrapped):
-	try:
-		auteurs = db.auteurs
-		auteur = auteurs.find_one({"pseudo": pseudo})
-		if auteur != None:
-			auteurs.update({'_id':auteur["_id"]}, {'$set':{'scrapped' : isScrapped}})
-	except Exception as e:
-		raise e
+def setScrappedProfil(db, pseudo, isScrapped):
+	auteurs = db.auteurs
+	auteur = auteurs.find_one({"pseudo": pseudo})
+	if auteur != None:
+		auteurs.update({'_id':auteur["_id"]}, {'$set':{'scrapped-profil' : isScrapped}})
 
 
+def setScrappedAbonne(db, pseudo, isScrapped):
+	auteurs = db.auteurs
+	auteur = auteurs.find_one({"pseudo": pseudo})
+	if auteur != None:
+		auteurs.update({'_id':auteur["_id"]}, {'$set':{'scrapped-abonne' : isScrapped}})
 
+
+def getNotScrapped(db):
+	auteurs = db.auteurs
+	auteur = auteurs.find_one({'scrapped-profil': False})
+	if auteur == None:
+		raise AssertionError("Aucun pseudo trouvé")
+	return auteur
+
+
+def getNotScrappedAbonne(db):
+	auteurs = db.auteurs
+	auteur = auteurs.find_one({'scrapped-abonne': False})
+	if auteur == None:
+		raise AssertionError("Aucun pseudo trouvé")
+	return auteur

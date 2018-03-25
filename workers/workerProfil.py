@@ -2,6 +2,7 @@ import sys
 import time
 from tools import generateurUrl
 from worker import Worker
+from worker import Exception410
 from parseurs.factoryParseur import FactoryParseur
 from pymongo.errors import ServerSelectionTimeoutError
 from verifications.verificationProfil import VerificationProfil
@@ -17,26 +18,28 @@ class WorkerProfil(Worker):
 
 	def run(self):
 		while True:
-			self.initDBConnection()	
-			pseudo = "meego"
-			self.getProfil(pseudo)
-			time.sleep(env.WORKER_FREQ)
+			try:
+				self.initDBConnection()	
+				auteur = modelProfil.getNotScrapped(self.db)
+				pseudo = auteur["pseudo"]
+				url = generateurUrl.userProfil(pseudo)
+				html = self.runGetQuery(url)
+				profil = self.parse(html)
+				profil['pseudo'] = pseudo
+				self.persiste(profil)
+				self.notify(pseudo, url, profil)
+			except Exception410 as e:
+				auteur["banni"] = 1
+				modelProfil.save(self.db, auteur)
+			except ServerSelectionTimeoutError as e:
+				self.retryConnect()
+			except Exception as e:
+				print(str(e))
+			finally:
+				print(env.WORKER_FREQ)
+				time.sleep(env.WORKER_FREQ)
 
 
-	def getProfil(self, pseudo):
-		try:
-			url = generateurUrl.userAbonne(pseudo)
-			html = self.runGetQuery(url)
-			profil = self.parse(html)
-			profil['pseudo'] = pseudo
-			self.persiste(profil)
-			self.notify(pseudo, url, profil)
-		except ServerSelectionTimeoutError as e:
-			self.retryConnect()
-		except Exception as e:
-			print(str(e))
-		finally:
-			time.sleep(env.WORKER_FREQ)
 
 
 	def persiste(self, profil):

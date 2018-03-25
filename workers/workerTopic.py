@@ -25,14 +25,16 @@ class WorkerTopic(Worker):
 		while True:
 			try:
 				self.initDBConnection()
-				cible = self.getUrlNotScrap()
+				cible = modelSujets.getNotScrapped(self.db)
+				cible["url"] = generateurUrl.startTopicPage(cible["url"], cible["nbReponses"])
+				modelSujets.setScrapped(self.db, cible["reference"], True)
 				self.extractReponseTopic(cible)
 				modelSujets.setScrappedFinish(self.db, cible["reference"], True)
 				modelSujets.setChanged(self.db, cible["reference"], False)
 			except ServerSelectionTimeoutError as e:
 				self.retryConnect()
-			except ExceptionAnyUrl as e:
-				print("plus aucune url a scrapper");
+			except Exception as e:
+				print(str(e));
 			finally:
 				time.sleep(env.WORKER_FREQ)
 
@@ -47,10 +49,9 @@ class WorkerTopic(Worker):
 				nextUrl = paggination[0] if len(paggination) > 0 else None
 				self.persiste(reponses, cible["reference"])				
 			except Exception410 as e:
+				nextUrl = None
 				modelSujets.setDeleted(self.db, cible["reference"], True)
 				print("Topic mort !", cible["reference"])
-			finally:				
-				time.sleep(env.WORKER_FREQ)
 
 
 	def persiste(self, reponses, refTopic):
@@ -64,9 +65,7 @@ class WorkerTopic(Worker):
 
 		for d in validator.data:
 			modelProfil.saveNotScrapped(self.db, d["auteur"])
-
-		if len(validator.data) > 0:
-			modelSujets.setScrapped(self.db, validator.data[0]["sujet"], True)
+			
 
 
 	def notify(self, ref, url, data):
@@ -78,11 +77,4 @@ class WorkerTopic(Worker):
 			print("Nb reponses trouvées : " + str(len(data)))		
 
 
-	def getUrlNotScrap(self):
-		cible = modelSujets.getNotScrapped(self.db)
-		if cible == None:
-			raise ExceptionAnyUrl()
-		
-		modelSujets.setScrapped(self.db, cible["reference"], True)			
-		cible["url"] = generateurUrl.startTopicPage(cible["url"], cible["nbReponses"])
-		return cible
+

@@ -74,7 +74,7 @@ class Worker():
 		if r.status_code == 410:
 			raise Exception410("La page à été supprimée")	
 		if r.status_code == 404:
-			raise AssertionError("La page est introuvable (ou supprimer)")		
+			raise Exception410("La page est introuvable (ou supprimer)")		
 		if r.status_code == 500:
 			raise AssertionError("Erreur du serveurs du site")
 

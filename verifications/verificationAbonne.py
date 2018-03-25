@@ -7,7 +7,7 @@ class VerificationAbonne:
 		self.data = data
 		self.schema = {
 			'pseudo'			: {'type': 'string', 'empty': False,'required' : True},
-			'abonnes'			: {'type': ['string', 'list'], 'empty': False,'required' : True},
+			'abonnes'			: {'type': ['string', 'list'], 'empty': True,'required' : True},
 		}
 
 

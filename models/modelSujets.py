@@ -65,18 +65,15 @@ def setDeleted(db, refSujet, val):
 
 
 def getNotScrapped(db):
-	try:
-		sujets = db.sujets
-		sujet = sujets.find_one({'$and': [{'scrapped': False},{'deleted': False},{'scrapped-finish': False}]})
-		if sujet != None:
-			sujet["nbReponses"] = modelReponses.countNbReponsesScrapped(db, sujet['reference'])
-			return sujet
+	sujets = db.sujets
+	sujet = sujets.find_one({'$and': [{'scrapped': False},{'deleted': False},{'scrapped-finish': False}]})
+	if sujet != None:
+		sujet["nbReponses"] = modelReponses.countNbReponsesScrapped(db, sujet['reference'])
+		return sujet
 
-		sujet = sujets.find_one({'$and': [{'changed': True},{'deleted': False}]})
-		if sujet != None:
-			sujet["nbReponses"] = modelReponses.countNbReponsesScrapped(db, sujet['reference'])
-			return sujet
+	sujet = sujets.find_one({'$and': [{'changed': True},{'deleted': False}]})
+	if sujet != None:
+		sujet["nbReponses"] = modelReponses.countNbReponsesScrapped(db, sujet['reference'])
+		return sujet
 
-		return None		
-	except Exception as e:
-		raise e	
+	raise AssertionError("Aucun sujet a scrapper trouvé")

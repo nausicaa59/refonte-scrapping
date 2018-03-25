@@ -28,6 +28,4 @@ class VerificationProfil:
 
 	def prepare(self):
 		self.data["pseudo"] = self.data["pseudo"].lower()
-		self.data['scrapped-profil'] = True
-		self.data['scrapped-abonne'] = False
 		self.data["dateInscription"] = helpers.parseDate(self.data["dateInscription"])

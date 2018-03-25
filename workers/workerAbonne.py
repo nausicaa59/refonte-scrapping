@@ -2,10 +2,12 @@ import sys
 import time
 from tools import generateurUrl
 from worker import Worker
+from worker import Exception410
 from parseurs.factoryParseur import FactoryParseur
 from pymongo.errors import ServerSelectionTimeoutError
 from verifications.verificationAbonne import VerificationAbonne
 from models import modelAbonne
+from models import modelProfil
 from env import env
 
 
@@ -16,8 +18,15 @@ class WorkerAbonne(Worker):
 
 
 	def run(self):
-		pseudo = "meego"
-		self.getAbonne(pseudo)
+		while True:
+			try:
+				self.initDBConnection()
+				auteur = modelProfil.getNotScrappedAbonne(self.db)
+				pseudo = auteur["pseudo"]
+				self.getAbonne(pseudo)
+			except Exception as e:
+				time.sleep(env.WORKER_FREQ)
+				
 
 
 	def getAbonne(self, pseudo):
@@ -26,16 +35,17 @@ class WorkerAbonne(Worker):
 			try:
 				self.initDBConnection()
 				html = self.runGetQuery(nextUrl)			
-				(pagination, abonnes) = self.parse(html)	
+				(pagination, abonnes) = self.parse(html)
 				data = {"pseudo" : pseudo, "abonnes" : abonnes}
 				self.notify(pseudo, nextUrl, data)
 				self.persiste(data)			
-				nextUrl = pagination[0] if len(pagination) > 0 else None			
+				nextUrl = pagination[0] if len(pagination) > 0 else None
 			except ServerSelectionTimeoutError as e:
 				self.retryConnect()
 			except Exception as e:
-				raise e
+				nextUrl = None
 			finally:
+				modelProfil.setScrappedAbonne(self.db, pseudo, True)	
 				time.sleep(env.WORKER_FREQ)
 
 
